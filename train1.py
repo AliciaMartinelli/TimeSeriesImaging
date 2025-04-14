@@ -16,7 +16,6 @@ import tensorflow_addons as tfa
 from keras.layers import *
 from keras.models import *
 from time import time
-from keras.utils import np_utils
 # import tensorflow_model_analysis as tfma
 
 from keras.wrappers.scikit_learn import KerasClassifier

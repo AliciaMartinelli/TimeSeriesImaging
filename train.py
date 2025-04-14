@@ -9,29 +9,29 @@ warnings.filterwarnings('ignore')
 
 import numpy as np
 import os
-import tensorflow as tf
-import tensorflow_addons as tfa
+#import tensorflow as tf
+#import tensorflow_addons as tfa
 
 
 from keras.layers import *
 from keras.models import *
-from time import time
-from keras.utils import np_utils
+#from time import time
+
 # import tensorflow_model_analysis as tfma
 
-from keras.wrappers.scikit_learn import KerasClassifier
+#from keras.wrappers.scikit_learn import KerasClassifier
 # from sklearn.grid_search import GridSearchCV,RandomizedSearchCV
 
 
-from sklearn.model_selection import RandomizedSearchCV
+# from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
-import keras.backend as K
+#import keras.backend as K
 import warnings
 warnings.filterwarnings('ignore')
 import numpy as np
 import pandas as pd
-import os, sys
+import os
 from xgboost import XGBClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
@@ -42,10 +42,10 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
 
 
-from sklearn.metrics import accuracy_score
+#from sklearn.metrics import accuracy_score
 import numpy as np
 import pandas as pd
-import seaborn as sb
+#import seaborn as sb
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
@@ -60,19 +60,19 @@ from sklearn.metrics import precision_score, recall_score, roc_auc_score, make_s
 import matplotlib.pyplot as plt
 
 # from scikeras.wrappers import KerasClassifier
-from scikeras.wrappers import KerasClassifier
+#from scikeras.wrappers import KerasClassifier
 # from keras.wrappers.scikit_learn import KerasClassifier
 from sklearn.metrics import roc_auc_score,  accuracy_score,precision_recall_curve, recall_score, precision_score, make_scorer, precision_recall_curve
 import datetime
 import joblib
 import pathlib
-from tensorflow.keras.applications.inception_v3 import InceptionV3
-from tensorflow.keras.applications import EfficientNetB0
+#from tensorflow.keras.applications.inception_v3 import InceptionV3
+#from tensorflow.keras.applications import EfficientNetB0
 
 
 from tensorflow.keras.preprocessing import image
-from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Dense, GlobalAveragePooling2D
+#from tensorflow.keras.models import Model
+#from tensorflow.keras.layers import Dense, GlobalAveragePooling2D
 # from pactools.grid_search import GridSearchCVProgressBar
 
 # get_ipython().run_line_magic('matplotlib', 'inline')
@@ -89,20 +89,7 @@ from utilis import seeding
 import parsing_file2
 seeding(42)
 mldl_uts = MLDL_utilitis()
-# def specificity(y_true, y_pred, x):
-#     """
-#     param:
-#     y_pred - Predicted labels
-#     y_true - True labels 
-#     Returns:
-#     Specificity score
-#     """
-#     neg_y_true = 1 - y_true
-#     neg_y_pred = 1 - y_pred
-#     fp = K.sum(neg_y_true * y_pred)
-#     tn = K.sum(neg_y_true * neg_y_pred)
-#     specificity = tn / (tn + fp + K.epsilon())
-#     return specificity
+
 
 def merge(value_1, value_2):
     return str(value_1) + "+-" + str(value_2)
@@ -126,9 +113,6 @@ def save_params_train_val_best(df, best_param, filename):
     
     df = df[df['params'] == best_param]
 
-    
-
-
     df1 = pd.DataFrame()
     df1["params"] = df["params"]
     df1["algorithm"] = df["algorithm"]
@@ -141,17 +125,14 @@ def save_params_train_val_best(df, best_param, filename):
     
     df1.to_csv(filename)
     return df1
-    # with open(f'{filename}.txt', 'w') as f:
-    #     f.write(str(best_param))
+
 
 # In[3]:
-
-
-
 
 def readParametersFromCmd(read):
     global features_name, ALGORITHMS, DEBUG, CV, DATA_TYPE, METHOD
     if read:
+        print("HERE1")
         parser = parsing_file2.create_parser_disease_model()
         args = parser.parse_args()
 
@@ -167,6 +148,7 @@ def readParametersFromCmd(read):
 
 
     else:
+        print("HERE2")
         features_name = "mfcc"
         ALGORITHMS = ["RF"]#"LR", "Ridge", "SVC", "KNN", "XGB", "DTC", "RF", "SGD"]
         ALGORITHMS=["RF","LR","Ridge","SVC","KNN","XGB","DTC","RF","SGD","NB","MLP","Bagging"]
@@ -206,12 +188,13 @@ def load_np_files(features_folder):
     X = np.array(X)
     y = np.array(y)
     LABELS = set(y)
-
+    print("load no files: " )
     print(X.shape, y.shape, LABELS)
     return X, y, LABELS
 
 readParametersFromCmd(True)
 # features_name = "mfcc"
+print("FEATURE NAME: " + features_name)
 features_folder = f"./features/{features_name}"
 
 current_model = datetime.datetime.now().strftime("%d_%m_%Y__%H_%M_%S")
@@ -230,7 +213,7 @@ print("-"*100, features_name, "\t", DATA_TYPE, "\t", current_model)
 if DATA_TYPE == "num":
     print("case 1")
     X, y, LABELS = load_np_files(f"./features/{features_name}")
-    LABELS =['belly_pain', 'burping', 'discomfort', 'hungry', 'tired']
+    LABELS =['0', '1']
 
     df = pd.DataFrame(X)
     COLUMNS = [f"S{i}" for i in df.columns]
@@ -248,10 +231,10 @@ if DATA_TYPE == "num":
     df_test = df1.loc[testIdx]
     # df = df1.sample(frac = 1)
     # df = df1.sample(frac = 1)
-    LABELS =['belly_pain', 'burping', 'discomfort', 'hungry', 'tired']
+    LABELS =['0', '1']
 
     tmp = LABELS.copy()
-    tmp.append('label') # ['label', 'belly_pain', 'burping', 'discomfort', 'hungry', 'tired']
+    tmp.append('label') # ['0', '1']
     X_train = df_train.drop(tmp, axis = 1)
     y_train = df_train['label']
 
@@ -267,7 +250,7 @@ elif DATA_TYPE == 'images':
     trainValIdx, testIdx = train_test_split(list(range(len(X))), test_size = 0.2, random_state = 42, shuffle=True, stratify = y)
     print("train + val data size: ", len(trainValIdx))
     print("test data size: ", len(testIdx))
-    LABELS =['belly_pain', 'burping', 'discomfort', 'hungry', 'tired']
+    LABELS =['0', '1']
 
     X_train = X[trainValIdx]
     X_test = X[testIdx]
@@ -978,12 +961,19 @@ try:
 
         model =  SVC(class_weight = 'balanced', random_state = 42)
 
-        param_grid = dict(
+        """ param_grid = dict(
             SVC__kernel = ['linear'],#', 'poly', 'rbf', 'sigmoid'],#precomputed
             SVC__degree=[5, 7, 8, 9],
             SVC__C= [0.001, 0.1,1, 10, 100],
             SVC__gamma = [1,0.1,0.01,0.001],
-                         )
+                         ) """
+        param_grid = dict(
+            SVC__kernel=['poly'],
+            SVC__degree=[3],
+            SVC__C=[10],
+            SVC__gamma=['scale'],
+        )
+
         param_grid = {} if DEBUG else param_grid
 
         #-------------------------------------------------------------------
@@ -1028,8 +1018,6 @@ try:
         x = classification_report(aa,bb, output_dict = True, target_names = LABELS)
         joblib.dump(grid_result.best_estimator_ , f'{current_model}/models/gs_model_{method}.pkl')
         x["model_size"] = os.path.getsize(f'{current_model}/models/gs_model_{method}.pkl')
-
-
 
 
         Results["test"][method] = pd.DataFrame.from_dict(x).T

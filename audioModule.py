@@ -57,7 +57,7 @@ class audioPreprocessing:
         self.signal, self.sample_rate = librosa.load(fileName, sr=22050)#, mono = isMono,duration = dur)
 #         self.signal, self.sample_rate = torchaudio.load(fileName, normalize=True)
         self.num_samples = self.signal.shape[0]
-        self.duration = librosa.get_duration(self.signal)
+        self.duration = librosa.get_duration(y=self.signal, sr=self.sample_rate)
 
         return self.signal
     

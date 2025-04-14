@@ -7,8 +7,8 @@ DATASET_PATH = "data/"
 #------------------------------------------
 ORGINAL_AUDIO_DATASET = "./dataset"
 
-# AUG_AUDIO_DATASET = "./aug_dataset"
-AUG_AUDIO_DATASET = "./dataset"
+AUG_AUDIO_DATASET = "aug_dataset"
+# AUG_AUDIO_DATASET = "./dataset"
 
 
 FEATURES_FOLDER = "./features"

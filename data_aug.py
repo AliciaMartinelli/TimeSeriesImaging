@@ -63,11 +63,12 @@ obj = audioModule.audioPreprocessing()
 
 def load_data(path):
     audioFiles = sorted(list(pathlib.Path(path).rglob("*.wav")))
-
-
-
-    classes = [str(f.parent).split("\\")[-1] for f in audioFiles]
+    
+    # Extract only the class label (the last part of the path)
+    classes = [str(f.parent).split(os.sep)[-1] for f in audioFiles]  # Modify this line to get only '0' or '1'
+    
     return audioFiles, classes
+
 
 
 def augment_data1(audioFileNames, classes, save_path):
@@ -77,10 +78,6 @@ def augment_data1(audioFileNames, classes, save_path):
         signal_org = obj.readAudio(x)
         print(signal_org.shape)
         signal = signal_org
-        # signal = obj._resample_if_necessary(signal_org, config.targetSampleRate)
-        # signal = obj._mix_down_if_necessary(signal)
-        # signal = obj._cut_if_necessary(signal, config.targetNumSamples)
-        # signal = obj._right_pad_if_necessary(signal, config.targetNumSamples)
 
         cc = pathlib.Path(f"{save_path}//" + "//".join(str(x).split("\\")[1:]))
         path2save = os.path.join(cc.parent, cc.stem + "_" + str(idx)+ cc.suffix)
@@ -95,40 +92,36 @@ def augment_data1(audioFileNames, classes, save_path):
 
 def augment_data(audioFileNames, classes, save_path):
     global obj
-    dictionary ={'belly_pain' :16,
-    'burping' : 8,
-    'discomfort':27 ,
-    'hungry' : 382,
-    'tired' : 24}
-    # audioFileNames = audioFileNames[0:2]
+    dictionary = {'1' :3600,  # Exoplanet class
+                  '0' :12137}  # Non-Exoplanet class
+
     print("before: ", len(audioFileNames))
     for idx, x in tqdm(enumerate(audioFileNames), total=len(audioFileNames)):
         signal_org = obj.readAudio(x)
-        cc = pathlib.Path(f"{save_path}//" + "//".join(str(x).split("\\")[1:]))
-        path2save = os.path.join(cc.parent, cc.stem + cc.suffix)            
-        pathlib.Path(pathlib.Path(path2save).parent).mkdir(parents=True, exist_ok=True)
-
-        if classes[idx] == "hungry":
-            # print(path2save)
-            # print(os.path.join(pathlib.Path(path2save).parent, x.name))
-            sf.write(os.path.join(pathlib.Path(path2save).parent, x.name), signal_org, config.targetSampleRate)
+        
+        # Get the class for the current file (either "0" or "1")
+        class_label = classes[idx]
+        
+        # Create the path to save the augmented file under the correct class directory
+        class_save_path = os.path.join(save_path, class_label)  # Subfolders '0' and '1'
+        pathlib.Path(class_save_path).mkdir(parents=True, exist_ok=True)
+        
+        if classes[idx] == "0":
+            augmented_signal = obj.audioAugmentation1(signal_org, [0])
+            augmented_file_name = f"{x.stem}_augmented{x.suffix}"
+            augmented_path = os.path.join(class_save_path, augmented_file_name)
+            sf.write(augmented_path, augmented_signal, config.targetSampleRate)
         else:
-            augmentation_num = 382//dictionary[classes[idx]] 
+            augmentation_num = 12137 // dictionary[class_label] 
             
-            signal = signal_org
-            # signal = obj._resample_if_necessary(signal_org, config.targetSampleRate)
-            # signal = obj._mix_down_if_necessary(signal)
-            # signal = obj._cut_if_necessary(signal, config.targetNumSamples)
-            # signal = obj._right_pad_if_necessary(signal, config.targetNumSamples)
-
-
             for i in range(augmentation_num):
-                path2save = os.path.join(cc.parent, cc.stem + "_" + str(idx)+ str(i) + cc.suffix)
-                augmented_signal = obj.audioAugmentation1(signal, [0])
-                pathlib.Path(cc.parent).mkdir(parents=True, exist_ok=True)
-                sf.write(path2save, augmented_signal, obj.sample_rate)
-                sf.write(os.path.join(pathlib.Path(path2save).parent, x.name), signal_org, config.targetSampleRate)
-    print("After:",len(list(pathlib.Path(save_path).rglob("*.wav"))))
+                augmented_signal = obj.audioAugmentation1(signal_org, [0])  # Apply augmentation
+                augmented_file_name = f"{x.stem}_{i}{x.suffix}"  # Use the original file name with an index
+                augmented_path = os.path.join(class_save_path, augmented_file_name)
+                sf.write(augmented_path, augmented_signal, obj.sample_rate)
+
+
+    print("After:", len(list(pathlib.Path(save_path).rglob("*.wav"))))
 
 
 import common
@@ -140,13 +133,4 @@ if __name__ == "__main__":
     print(f"Train: {len(X)} - {len(y)}")
     """ Data augmentation """
     augment_data(X, y, common.AUG_AUDIO_DATASET)
-
-
-    # np.random.seed(42)
-    # """ Load the data """
-    # data_path = "new_dataset/"
-    # X, y = load_data(data_path)
-    # print(f"Train: {len(X)} - {len(y)}")
-    # """ Data augmentation """
-    # augment_data(X, y, "last_dataset/")
 
