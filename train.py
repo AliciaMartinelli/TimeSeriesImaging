@@ -132,7 +132,6 @@ def save_params_train_val_best(df, best_param, filename):
 def readParametersFromCmd(read):
     global features_name, ALGORITHMS, DEBUG, CV, DATA_TYPE, METHOD
     if read:
-        print("HERE1")
         parser = parsing_file2.create_parser_disease_model()
         args = parser.parse_args()
 
@@ -148,7 +147,6 @@ def readParametersFromCmd(read):
 
 
     else:
-        print("HERE2")
         features_name = "mfcc"
         ALGORITHMS = ["RF"]#"LR", "Ridge", "SVC", "KNN", "XGB", "DTC", "RF", "SGD"]
         ALGORITHMS=["RF","LR","Ridge","SVC","KNN","XGB","DTC","RF","SGD","NB","MLP","Bagging"]
@@ -555,7 +553,7 @@ if 1:
         # solver  = ['liblinear', 'newton-cg', 'lbfgs', 'sag', 'saga']#'lbfgs', 'liblinear', 'newton-cg', 'newton-cholesky', 'sag', 'saga']   
 
         param_grid = dict(
-            RF__max_depth = range(1,21),
+            RF__max_depth=[1, 3, 5, 7, 9, 12, 14, 16, 18, 21],
             RF__max_leaf_nodes = [50],
             RF__n_estimators = [10, 100, 200],
             RF__max_features = ['sqrt', 'log2'],
@@ -961,18 +959,12 @@ try:
 
         model =  SVC(class_weight = 'balanced', random_state = 42)
 
-        """ param_grid = dict(
+        param_grid = dict(
             SVC__kernel = ['linear'],#', 'poly', 'rbf', 'sigmoid'],#precomputed
             SVC__degree=[5, 7, 8, 9],
             SVC__C= [0.001, 0.1,1, 10, 100],
             SVC__gamma = [1,0.1,0.01,0.001],
-                         ) """
-        param_grid = dict(
-            SVC__kernel=['poly'],
-            SVC__degree=[3],
-            SVC__C=[10],
-            SVC__gamma=['scale'],
-        )
+                         )
 
         param_grid = {} if DEBUG else param_grid
 
