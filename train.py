@@ -82,7 +82,7 @@ from sklearn.decomposition import PCA
 
 # In[2]:
 
-
+print("START")
 import common
 from ML_DL_utilis import MLDL_utilitis
 from utilis import seeding
@@ -130,6 +130,7 @@ def save_params_train_val_best(df, best_param, filename):
 # In[3]:
 
 def readParametersFromCmd(read):
+    print("Read Parameters From Cmd")
     global features_name, ALGORITHMS, DEBUG, CV, DATA_TYPE, METHOD
     if read:
         parser = parsing_file2.create_parser_disease_model()
@@ -189,7 +190,7 @@ def load_np_files(features_folder):
     print("load no files: " )
     print(X.shape, y.shape, LABELS)
     return X, y, LABELS
-
+print("START")
 readParametersFromCmd(True)
 # features_name = "mfcc"
 print("FEATURE NAME: " + features_name)
@@ -955,18 +956,31 @@ except Exception as e:
 # ## ------------------------------------------------------------------------------------------SVC
 try:
     method = "SVC"
+    print(f"\nStarting GridSearch for {method}...")
     if method in ALGORITHMS:
+
+        print(f"\nStarting GridSearch for {method}...")
 
         model =  SVC(class_weight = 'balanced', random_state = 42)
 
         param_grid = dict(
-            SVC__kernel = ['linear'],#', 'poly', 'rbf', 'sigmoid'],#precomputed
+            SVC__kernel = ['linear'],
+            SVC__degree=[5, 7, 9],
+            SVC__C= [0.001,1, 100],
+            SVC__gamma = [1,0.01,0.001],
+        )
+
+        """ param_grid = dict(
+            SVC__kernel = ['linear'],
             SVC__degree=[5, 7, 8, 9],
             SVC__C= [0.001, 0.1,1, 10, 100],
             SVC__gamma = [1,0.1,0.01,0.001],
-                         )
+        ) """
 
         param_grid = {} if DEBUG else param_grid
+
+        print("Using the following parameter grid for GridSearchCV:")
+        print(param_grid)
 
         #-------------------------------------------------------------------
         scaler = StandardScaler() 
@@ -977,26 +991,31 @@ try:
                             refit='accuracy',
                             return_train_score=True,
                             error_score="raise",
-                            verbose=2
-                           )
+                            verbose=2)
+        
+        print("\nStarting GridSearchCV fitting process...")
         grid_result = grid.fit(X_train, y_train)
+        print("\nGridSearchCV completed.")
+
         grid_result.cv_results_["algorithm"] = method
         df = pd.DataFrame(grid_result.cv_results_)
         df = df.sort_values(by=['mean_test_accuracy'], ascending=False).reset_index().round(4)
 
         df = df.drop(['index', "mean_fit_time", "std_fit_time", "mean_score_time", "std_score_time"], axis=1)
-        # ####display(df)
+        
         Results["train"][method] = df
-        # df.to_csv("results.csv")
+        print("\nBest hyperparameters found:")
+        print(grid_result.best_params_)
 
         model = grid_result.best_estimator_ 
         #------------------------------------------confusion matrix
         y_pred = model.predict(X_test.astype('float32'))
 
-        aa = y_test#(np.argmax(y_test.values, axis = 0))
-        bb = y_pred#(np.argmax(y_pred, axis = 0))
+        aa = y_test
+        bb = y_pred
+        
+        print("\nGenerating confusion matrix and classification report...")
 
-        # y_pred = y_pred.argmax(axis=1)
         image_cm = mldl_uts.make_confusion_matrix(
             y = aa,
             y_pred = bb,
